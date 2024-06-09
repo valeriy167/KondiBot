@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SettingsNavigate">
+
+    <ImageButton
+        android:id="@+id/imageButton6"
+        android:layout_width="81dp"
+        android:layout_height="82dp"
+        android:backgroundTint="#00AF2A2A"
+        android:onClick="onClickHome"
+        android:scaleType="centerCrop"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/home"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <Button
+        android:id="@+id/button11"
+        android:layout_width="396dp"
+        android:layout_height="142dp"
+        android:layout_marginTop="268dp"
+        android:backgroundTint="#000000"
+        android:backgroundTintMode="add"
+        android:onClick="onClickTO"
+        android:shadowColor="#FF0000"
+        android:text="Техническое Обслуживание"
+        android:textColor="#FFFFFF"
+        android:textColorHighlight="#FDFDFD"
+        android:textColorHint="#FFFFFF"
+        android:textColorLink="#FFFFFF"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:rippleColor="#CD0A0A"
+        app:strokeColor="#FF0000" />
+
+    <Button
+        android:id="@+id/button17"
+        android:layout_width="289dp"
+        android:layout_height="89dp"
+        android:layout_marginTop="56dp"
+        android:backgroundTint="#000000"
+        android:backgroundTintMode="add"
+        android:onClick="onClickFood"
+        android:shadowColor="#FF0000"
+        android:text="Продукты"
+        android:textColor="#FFFFFF"
+        android:textColorHighlight="#FDFDFD"
+        android:textColorHint="#FFFFFF"
+        android:textColorLink="#FFFFFF"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button11"
+        app:rippleColor="#CD0A0A"
+        app:strokeColor="#FF0000" />
+
+    <Button
+        android:id="@+id/button10"
+        android:layout_width="289dp"
+        android:layout_height="89dp"
+        android:layout_marginTop="196dp"
+        android:backgroundTint="#000000"
+        android:backgroundTintMode="add"
+        android:onClick="onClickCommands"
+        android:shadowColor="#FF0000"
+        android:text="Команды"
+        android:textColor="#FFFFFF"
+        android:textColorHighlight="#FDFDFD"
+        android:textColorHint="#FFFFFF"
+        android:textColorLink="#FFFFFF"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button11"
+        app:rippleColor="#CD0A0A"
+        app:strokeColor="#FF0000" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="187dp"
+        android:layout_height="197dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/shesteny" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
