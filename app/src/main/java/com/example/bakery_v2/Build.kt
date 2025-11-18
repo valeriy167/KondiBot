@@ -2,7 +2,6 @@ package com.example.bakery_v2
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.PointF
 import android.os.Bundle
 import android.os.StrictMode
 import android.view.View
@@ -19,7 +18,7 @@ import kotlin.math.sqrt
 
 class Build : AppCompatActivity() {
 
-    private var layers = 2  // минимум 2 слоя
+    private var layers = 2
     private var choco = 1
     private var cherry = 0
 
@@ -28,8 +27,6 @@ class Build : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_build)
 
-        // Разрешить сетевые операции в основном потоке (ТОЛЬКО для отладки!)
-        // В продакшене замените на CoroutineScope(Dispatchers.IO) { ... }
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
                 .permitAll()
@@ -51,17 +48,15 @@ class Build : AppCompatActivity() {
         val txtCherry = findViewById<TextView>(R.id.cherryNum)
         val drawingView = findViewById<DrawingView>(R.id.drawingView)
 
-        // Обновление отображения
         fun updateUI() {
             txtLayers.text = layers.toString()
             txtChoco.text = choco.toString()
             txtCherry.text = cherry.toString()
         }
 
-        // Инициализация
         updateUI()
 
-        // Слушатели изменения слоёв и начинок
+        // Слушатели
         btnPlusLayers.setOnClickListener {
             if (layers < 6) {
                 layers++
@@ -107,7 +102,6 @@ class Build : AppCompatActivity() {
             }
         }
 
-        // Управление рисованием
         btnClear.setOnClickListener {
             drawingView.clear()
             Toast.makeText(this, "Очищено", Toast.LENGTH_SHORT).show()
@@ -115,11 +109,10 @@ class Build : AppCompatActivity() {
 
         btnUndo.setOnClickListener {
             if (drawingView.undo()) {
-                Toast.makeText(this, "↩ Отменено", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Отменено", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // Отправка заказа
         btnCreate.setOnClickListener {
             val points = drawingView.getPoints()
             if (points.size < 3) {
@@ -127,18 +120,25 @@ class Build : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Упрощение пути
+            // Упрощение + ОКРУГЛЕНИЕ до целых!
             val simplified = simplifyPath(points, epsilon = 3.0f)
             if (simplified.size < 2) {
                 Toast.makeText(this, "Узор слишком простой", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // ОКРУГЛЕНИЕ: x и y → Int
+            val roundedPoints = simplified.map {
+                "${it.x.toInt()},${it.y.toInt()}"
+            }
+
             // Формат: layers|choco|cherry|x1,y1;x2,y2;...
-            val pointsStr = simplified.joinToString(";") { "${it.x},${it.y}" }
+            val pointsStr = roundedPoints.joinToString(";")
             val command = "$layers|$choco|$cherry|$pointsStr"
 
-            // Отправка на ESP32
+            // Отладка: вывод в лог
+            println("Отправляю: $command")
+
             Thread {
                 try {
                     val socket = DatagramSocket()
@@ -152,21 +152,24 @@ class Build : AppCompatActivity() {
                     socket.send(packet)
                     socket.close()
 
-                    // Уведомление в UI потоке
                     runOnUiThread {
-                        Toast.makeText(this, "Заказ отправлен!\nРисую узор из ${simplified.size} точек", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this,
+                            "Заказ отправлен!\nТочек: ${roundedPoints.size}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 } catch (e: Exception) {
                     runOnUiThread {
-                        Toast.makeText(this, "Ошибка отправки:\n${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Ошибка:\n${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }.start()
         }
     }
 
-    // Алгоритм Дугласа-Пекера (рекурсивный)
-    private fun simplifyPath(points: List<PointF>, epsilon: Float): List<PointF> {
+    // Алгоритм Дугласа-Пекера (без изменений)
+    private fun simplifyPath(points: List<android.graphics.PointF>, epsilon: Float): List<android.graphics.PointF> {
         if (points.size <= 2) return points
 
         val first = points.first()
@@ -174,7 +177,6 @@ class Build : AppCompatActivity() {
         var farthestIndex = -1
         var maxDist = 0f
 
-        // Найти самую удалённую точку
         for (i in 1 until points.lastIndex) {
             val dist = perpendicularDistance(points[i], first, last)
             if (dist > maxDist) {
@@ -192,7 +194,7 @@ class Build : AppCompatActivity() {
         }
     }
 
-    private fun perpendicularDistance(p: PointF, start: PointF, end: PointF): Float {
+    private fun perpendicularDistance(p: android.graphics.PointF, start: android.graphics.PointF, end: android.graphics.PointF): Float {
         val dx = end.x - start.x
         val dy = end.y - start.y
         val lenSq = dx * dx + dy * dy
@@ -201,14 +203,13 @@ class Build : AppCompatActivity() {
         val t = ((p.x - start.x) * dx + (p.y - start.y) * dy) / lenSq
         val projX = start.x + t * dx
         val projY = start.y + t * dy
-        return distance(p, PointF(projX, projY))
+        return distance(android.graphics.PointF(projX, projY), p)
     }
 
-    private fun distance(p1: PointF, p2: PointF): Float {
+    private fun distance(p1: android.graphics.PointF, p2: android.graphics.PointF): Float {
         return sqrt((p1.x - p2.x).pow(2) + (p1.y - p2.y).pow(2))
     }
 
-    // Возврат в главное меню
     fun onClickHome(view: View) {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
