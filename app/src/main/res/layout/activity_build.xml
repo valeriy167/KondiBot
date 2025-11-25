@@ -1,300 +1,293 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/_623967124_31_phonot"
-    tools:context=".Build">
+    android:fillViewport="true">
 
-    <!-- Заголовок -->
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Создать торт"
-        android:textColor="#000000"
-        android:textSize="34sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:padding="16dp">
 
-    <!-- Кнопка "Домой" -->
-    <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="81dp"
-        android:layout_height="82dp"
-        android:backgroundTint="#00AF2A2A"
-        android:onClick="onClickHome"
-        android:scaleType="centerCrop"
-        android:scaleX="1.5"
-        android:scaleY="1.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/home"
-        tools:ignore="SpeakableTextPresentCheck" />
+        <!-- Header -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Cake"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#2D1B11"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Слои -->
+        <ImageButton
+            android:id="@+id/btnHome"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_home"
+            android:contentDescription="Home"
+            android:onClick="onClickHome"
+            app:layout_constraintTop_toTopOf="@+id/title"
+            app:layout_constraintBottom_toBottomOf="@+id/title"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="134dp"
-        android:layout_height="62dp"
-        android:layout_marginTop="12dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Слои:"
-        android:textColor="#000000"
-        android:textSize="34sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        <!-- Layers -->
+        <TextView
+            android:id="@+id/labelLayers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Layers:"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/layersNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:text="2"
-        android:textColor="#000000"
-        android:textSize="48sp"
-        app:layout_constraintStart_toEndOf="@+id/textView4"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        <TextView
+            android:id="@+id/layersNum"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="2"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_counter"
+            app:layout_constraintTop_toTopOf="@+id/labelLayers"
+            app:layout_constraintBottom_toBottomOf="@+id/labelLayers"
+            app:layout_constraintStart_toEndOf="@+id/labelLayers" />
 
-    <Button
-        android:id="@+id/minusLayers"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="-"
-        android:textColor="#FFFFFF"
-        android:textSize="42sp"
-        app:layout_constraintBottom_toBottomOf="@+id/layersNum"
-        app:layout_constraintStart_toEndOf="@+id/layersNum"
-        app:layout_constraintTop_toTopOf="@+id/layersNum" />
+        <Button
+            android:id="@+id/minusLayers"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:text="-"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:cornerRadius="8dp"
+            app:layout_constraintTop_toTopOf="@+id/labelLayers"
+            app:layout_constraintBottom_toBottomOf="@+id/labelLayers"
+            app:layout_constraintStart_toEndOf="@+id/layersNum" />
 
-    <Button
-        android:id="@+id/plusLayers"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="+"
-        android:textColor="#FFFFFF"
-        android:textSize="42sp"
-        app:layout_constraintBottom_toBottomOf="@+id/layersNum"
-        app:layout_constraintStart_toEndOf="@+id/minusLayers"
-        app:layout_constraintTop_toTopOf="@+id/layersNum" />
+        <Button
+            android:id="@+id/plusLayers"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:text="+"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:cornerRadius="8dp"
+            app:layout_constraintTop_toTopOf="@+id/labelLayers"
+            app:layout_constraintBottom_toBottomOf="@+id/labelLayers"
+            app:layout_constraintStart_toEndOf="@+id/minusLayers" />
 
-    <!-- Начинки -->
+        <!-- Fillings -->
+        <TextView
+            android:id="@+id/labelFillings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Fillings:"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@+id/labelLayers"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Шоколад -->
-    <TextView
-        android:id="@+id/textView6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Начинки:"
-        android:textColor="#000000"
-        android:textSize="34sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layersNum" />
+        <!-- Chocolate -->
+        <TextView
+            android:id="@+id/labelChoco"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Chocolate:"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/labelFillings"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/textView7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Шоколад"
-        android:textColor="#000000"
-        android:textSize="30sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.112"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+        <TextView
+            android:id="@+id/chocoNum"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="1"
+            android:textSize="18sp"
+            android:background="@drawable/bg_counter"
+            app:layout_constraintTop_toTopOf="@+id/labelChoco"
+            app:layout_constraintBottom_toBottomOf="@+id/labelChoco"
+            app:layout_constraintStart_toEndOf="@+id/labelChoco" />
 
-    <TextView
-        android:id="@+id/chocoNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="1"
-        android:textColor="#000000"
-        android:textSize="42sp"
-        app:layout_constraintEnd_toEndOf="@+id/textView7"
-        app:layout_constraintStart_toStartOf="@+id/textView7"
-        app:layout_constraintTop_toBottomOf="@+id/textView7" />
+        <Button
+            android:id="@+id/minusChoco"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:layout_constraintTop_toTopOf="@+id/labelChoco"
+            app:layout_constraintBottom_toBottomOf="@+id/labelChoco"
+            app:layout_constraintStart_toEndOf="@+id/chocoNum" />
 
-    <Button
-        android:id="@+id/minusChoco"
-        android:layout_width="61dp"
-        android:layout_height="66dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="-"
-        android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toBottomOf="@+id/chocoNum"
-        app:layout_constraintEnd_toStartOf="@+id/chocoNum"
-        app:layout_constraintTop_toTopOf="@+id/chocoNum" />
+        <Button
+            android:id="@+id/plusChoco"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:text="+"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:layout_constraintTop_toTopOf="@+id/labelChoco"
+            app:layout_constraintBottom_toBottomOf="@+id/labelChoco"
+            app:layout_constraintStart_toEndOf="@+id/minusChoco" />
 
-    <Button
-        android:id="@+id/plusChoco"
-        android:layout_width="71dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="+"
-        android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toBottomOf="@+id/chocoNum"
-        app:layout_constraintStart_toEndOf="@+id/chocoNum"
-        app:layout_constraintTop_toTopOf="@+id/chocoNum" />
+        <!-- Cherry -->
+        <TextView
+            android:id="@+id/labelCherry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Cherry:"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@+id/labelChoco"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Вишня -->
+        <TextView
+            android:id="@+id/cherryNum"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="18sp"
+            android:background="@drawable/bg_counter"
+            app:layout_constraintTop_toTopOf="@+id/labelCherry"
+            app:layout_constraintBottom_toBottomOf="@+id/labelCherry"
+            app:layout_constraintStart_toEndOf="@+id/labelCherry" />
 
-    <TextView
-        android:id="@+id/textView8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Вишня"
-        android:textColor="#000000"
-        android:textSize="30sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.849"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+        <Button
+            android:id="@+id/minusCherry"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:text="-"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:layout_constraintTop_toTopOf="@+id/labelCherry"
+            app:layout_constraintBottom_toBottomOf="@+id/labelCherry"
+            app:layout_constraintStart_toEndOf="@+id/cherryNum" />
 
-    <TextView
-        android:id="@+id/cherryNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="0"
-        android:textColor="#000000"
-        android:textSize="42sp"
-        app:layout_constraintEnd_toEndOf="@+id/textView8"
-        app:layout_constraintStart_toStartOf="@+id/textView8"
-        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+        <Button
+            android:id="@+id/plusCherry"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:text="+"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#795548"
+            app:layout_constraintTop_toTopOf="@+id/labelCherry"
+            app:layout_constraintBottom_toBottomOf="@+id/labelCherry"
+            app:layout_constraintStart_toEndOf="@+id/minusCherry" />
 
-    <Button
-        android:id="@+id/minusCherry"
-        android:layout_width="66dp"
-        android:layout_height="58dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="-"
-        android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toBottomOf="@+id/cherryNum"
-        app:layout_constraintEnd_toStartOf="@+id/cherryNum"
-        app:layout_constraintTop_toTopOf="@+id/cherryNum" />
+        <!-- Drawing Area -->
+        <TextView
+            android:id="@+id/labelDrawing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Draw Your Design"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@+id/labelCherry"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/plusCherry"
-        android:layout_width="71dp"
-        android:layout_height="62dp"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="#F65E5E"
-        android:text="+"
-        android:textColor="#FFFFFF"
-        android:textSize="36sp"
-        app:layout_constraintBottom_toBottomOf="@+id/cherryNum"
-        app:layout_constraintStart_toEndOf="@+id/cherryNum"
-        app:layout_constraintTop_toTopOf="@+id/cherryNum" />
+        <!-- Круглый холст -->
+        <com.example.bakery_v2.CircleDrawingView
+            android:id="@+id/drawingView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toBottomOf="@+id/labelDrawing"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.8" />
 
-    <!-- Заголовок рисования -->
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:id="@+id/controlButtons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/drawingView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- DrawingView (основное поле) -->
-    <TextView
-        android:id="@+id/textView26"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:background="#92FFBDBD"
-        android:gravity="center"
-        android:text="Нарисуйте узор"
-        android:textColor="#000000"
-        android:textSize="28sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.516"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chocoNum" />
+            <Button
+                android:id="@+id/btnClear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Clear"
+                android:textStyle="bold"
+                android:backgroundTint="@android:color/white"
+                android:textColor="#E64A19"
+                app:strokeColor="#E64A19"
+                app:strokeWidth="1dp" />
 
-    <com.example.bakery_v2.DrawingView
-        android:id="@+id/drawingView"
-        android:layout_width="227dp"
-        android:layout_height="212dp"
-        android:layout_margin="16dp"
-        android:background="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/btnClear"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView26" />
+            <Button
+                android:id="@+id/btnUndo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Undo"
+                android:textStyle="bold"
+                android:backgroundTint="@android:color/white"
+                android:textColor="#E64A19"
+                app:strokeColor="#E64A19"
+                app:strokeWidth="1dp" />
+        </LinearLayout>
 
-    <!-- Кнопки управления -->
-    <Button
-        android:id="@+id/btnClear"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="12dp"
-        android:backgroundTint="#F65E5E"
-        android:text="Очистить"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/createButton"
-        app:layout_constraintEnd_toStartOf="@+id/btnUndo"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        <!-- Progress & Create -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/controlButtons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/btnUndo"
-        android:layout_width="150dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="12dp"
-        android:backgroundTint="#FFA726"
-        android:text="Отменить"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/createButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btnClear" />
+        <Button
+            android:id="@+id/createButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:text="Create Cake"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#E64A19"
+            app:layout_constraintTop_toBottomOf="@+id/progressBar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Кнопка "Создать" -->
-    <Button
-        android:id="@+id/createButton"
-        android:layout_width="260dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="4dp"
-        android:backgroundTint="#27AE60"
-        android:text="✅ Создать торт"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

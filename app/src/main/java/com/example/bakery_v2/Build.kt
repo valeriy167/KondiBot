@@ -2,16 +2,19 @@ package com.example.bakery_v2
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.PointF
 import android.os.Bundle
-import android.os.StrictMode
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
+import java.io.*
+import java.net.Socket
+import java.net.SocketTimeoutException
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -21,19 +24,13 @@ class Build : AppCompatActivity() {
     private var layers = 2
     private var choco = 1
     private var cherry = 0
+    private val uiHandler = Handler(Looper.getMainLooper())
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_build)
 
-        StrictMode.setThreadPolicy(
-            StrictMode.ThreadPolicy.Builder()
-                .permitAll()
-                .build()
-        )
-
-        // UI элементы
         val btnPlusLayers = findViewById<Button>(R.id.plusLayers)
         val btnMinusLayers = findViewById<Button>(R.id.minusLayers)
         val btnPlusChoco = findViewById<Button>(R.id.plusChoco)
@@ -46,17 +43,16 @@ class Build : AppCompatActivity() {
         val txtLayers = findViewById<TextView>(R.id.layersNum)
         val txtChoco = findViewById<TextView>(R.id.chocoNum)
         val txtCherry = findViewById<TextView>(R.id.cherryNum)
-        val drawingView = findViewById<DrawingView>(R.id.drawingView)
+        val drawingView = findViewById<CircleDrawingView>(R.id.drawingView)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
 
         fun updateUI() {
             txtLayers.text = layers.toString()
             txtChoco.text = choco.toString()
             txtCherry.text = cherry.toString()
         }
-
         updateUI()
 
-        // Слушатели
         btnPlusLayers.setOnClickListener {
             if (layers < 6) {
                 layers++
@@ -104,74 +100,67 @@ class Build : AppCompatActivity() {
 
         btnClear.setOnClickListener {
             drawingView.clear()
-            Toast.makeText(this, "Очищено", Toast.LENGTH_SHORT).show()
         }
 
         btnUndo.setOnClickListener {
-            if (drawingView.undo()) {
-                Toast.makeText(this, "Отменено", Toast.LENGTH_SHORT).show()
-            }
+            drawingView.undo()
         }
 
         btnCreate.setOnClickListener {
             val points = drawingView.getPoints()
             if (points.size < 3) {
-                Toast.makeText(this, "Нарисуйте узор (минимум 3 точки)!", Toast.LENGTH_LONG).show()
+                showToast("Narisiite uzor (minimum 3 tochki)!")
                 return@setOnClickListener
             }
 
-            // Упрощение + ОКРУГЛЕНИЕ до целых!
-            val simplified = simplifyPath(points, epsilon = 3.0f)
+            val epsilon = if (points.size > 150) 4.0f else 3.0f
+            val simplified = simplifyPath(points, epsilon)
             if (simplified.size < 2) {
-                Toast.makeText(this, "Узор слишком простой", Toast.LENGTH_SHORT).show()
+                showToast("Uzor slishkom prostoy")
                 return@setOnClickListener
             }
 
-            // ОКРУГЛЕНИЕ: x и y → Int
-            val roundedPoints = simplified.map {
+            // Format: layers|choco|cherry|x1,y1;x2,y2;...
+            // Coordinates as integers (pixels)
+            val pointsStr = simplified.joinToString(";") {
                 "${it.x.toInt()},${it.y.toInt()}"
             }
-
-            // Формат: layers|choco|cherry|x1,y1;x2,y2;...
-            val pointsStr = roundedPoints.joinToString(";")
             val command = "$layers|$choco|$cherry|$pointsStr"
 
-            // Отладка: вывод в лог
-            println("Отправляю: $command")
+            progressBar.visibility = View.VISIBLE
+            btnCreate.isEnabled = false
 
             Thread {
                 try {
-                    val socket = DatagramSocket()
-                    val sendData = command.toByteArray(Charsets.UTF_8)
-                    val packet = DatagramPacket(
-                        sendData,
-                        sendData.size,
-                        InetAddress.getByName("192.168.4.1"),
-                        80
-                    )
-                    socket.send(packet)
-                    socket.close()
+                    Socket("192.168.4.1", 80).use { socket ->
+                        socket.soTimeout = 10000
+                        val output = PrintWriter(socket.getOutputStream(), true)
+                        val input = BufferedReader(InputStreamReader(socket.getInputStream()))
 
-                    runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            "Заказ отправлен!\nТочек: ${roundedPoints.size}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        output.println(command)
+                        val response = input.readLine() ?: "Bez otveta"
+
+                        uiHandler.post {
+                            progressBar.visibility = View.GONE
+                            btnCreate.isEnabled = true
+                            if (response.startsWith("OK")) {
+                                showToast("Gotovo! ${simplified.size} tochek obrabotano", Toast.LENGTH_LONG)
+                            } else {
+                                showToast("Oshibka: $response", Toast.LENGTH_LONG)
+                            }
+                        }
                     }
+                } catch (e: SocketTimeoutException) {
+                    postError("Vremennoy limit: stanok ne otvetil")
                 } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(this, "Ошибка:\n${e.message}", Toast.LENGTH_LONG).show()
-                    }
+                    postError("Set: ${e.message ?: "neizvestnaya oshibka"}")
                 }
             }.start()
         }
     }
 
-    // Алгоритм Дугласа-Пекера (без изменений)
-    private fun simplifyPath(points: List<android.graphics.PointF>, epsilon: Float): List<android.graphics.PointF> {
+    private fun simplifyPath(points: List<PointF>, epsilon: Float): List<PointF> {
         if (points.size <= 2) return points
-
         val first = points.first()
         val last = points.last()
         var farthestIndex = -1
@@ -194,20 +183,31 @@ class Build : AppCompatActivity() {
         }
     }
 
-    private fun perpendicularDistance(p: android.graphics.PointF, start: android.graphics.PointF, end: android.graphics.PointF): Float {
+    private fun perpendicularDistance(p: PointF, start: PointF, end: PointF): Float {
         val dx = end.x - start.x
         val dy = end.y - start.y
         val lenSq = dx * dx + dy * dy
         if (lenSq == 0f) return distance(p, start)
-
         val t = ((p.x - start.x) * dx + (p.y - start.y) * dy) / lenSq
         val projX = start.x + t * dx
         val projY = start.y + t * dy
-        return distance(android.graphics.PointF(projX, projY), p)
+        return distance(p, PointF(projX, projY))
     }
 
-    private fun distance(p1: android.graphics.PointF, p2: android.graphics.PointF): Float {
+    private fun distance(p1: PointF, p2: PointF): Float {
         return sqrt((p1.x - p2.x).pow(2) + (p1.y - p2.y).pow(2))
+    }
+
+    private fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        uiHandler.post { Toast.makeText(this, message, duration).show() }
+    }
+
+    private fun postError(message: String) {
+        uiHandler.post {
+            findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
+            findViewById<Button>(R.id.createButton).isEnabled = true
+            showToast("Oshibka: $message", Toast.LENGTH_LONG)
+        }
     }
 
     fun onClickHome(view: View) {

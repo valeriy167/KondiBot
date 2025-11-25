@@ -1,0 +1,27 @@
+<resources>
+    <style name="ControlButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/button_control</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minWidth">40dp</item>
+        <item name="android:minHeight">40dp</item>
+    </style>
+
+    <style name="ActionButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/bg_action_button</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="PrimaryButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/button_primary</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+</resources>
