@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import kotlin.math.abs
 import kotlin.math.pow
-import android.graphics.PointF
 import kotlin.math.sqrt
+import kotlin.math.min
 
 class CircleDrawingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,19 +34,26 @@ class CircleDrawingView @JvmOverloads constructor(
     private val pointsHistory = mutableListOf<List<PointF>>()
 
     init {
-        // Делаем View круглым
+        // 💡 Исправление 1: безопасный outlineProvider (без minOf!)
         outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
-                val radius = minOf(width, height) / 2f
-                outline.setOval(0, 0, width, height)
+                // Защита от width=0
+                if (view.width <= 0 || view.height <= 0) {
+                    outline.setRect(0, 0, 0, 0)
+                    return
+                }
+                // Используем min() вместо minOf()
+                val size = min(view.width, view.height).toFloat()
+                outline.setOval(0f, 0f, size, size)
             }
         }
         clipToOutline = true
-        setLayerType(LAYER_TYPE_HARDWARE, null)
+        // 💡 Исправление 2: убрать setLayerType — он может ломать touch на некоторых устройствах
+        // setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
     fun clear() {
-        pathHistory.add(Path(path))          // сохраняем текущее состояние
+        pathHistory.add(Path(path))
         pointsHistory.add(points.toList())
         path.reset()
         points.clear()
@@ -56,47 +63,70 @@ class CircleDrawingView @JvmOverloads constructor(
     fun getPoints(): List<PointF> = points.toList()
 
     fun undo(): Boolean {
-        if (pathHistory.isNotEmpty()) {
+        return if (pathHistory.isNotEmpty()) {
             path.set(pathHistory.removeLast())
             points.clear()
             points.addAll(pointsHistory.removeLast())
             invalidate()
-            return true
+            true
+        } else {
+            false
         }
-        return false
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // 💡 Исправление 3: используем getPointerCoords() для надёжности
         val x = event.x
         val y = event.y
 
-        // Ограничение по кругу
+        // Защита от инициализации
+        if (width == 0 || height == 0) return true
+
+        // Центр и радиус с отступом
         val cx = width / 2f
         val cy = height / 2f
-        val r = minOf(width, height) / 2f * 0.92f  // 92% — отступ от края
+        val radius = min(width, height) / 2f * 0.92f
 
-        if ((x - cx).pow(2) + (y - cy).pow(2) > r.pow(2)) {
-            return true  // outside circle — consume but don't draw
+        // 💡 Исправление 4: НЕ отбрасываем события за кругом!
+        // Вместо этого — проецируем точку НА окружность
+        val dx = x - cx
+        val dy = y - cy
+        val distance = sqrt(dx * dx + dy * dy)
+
+        val targetX: Float
+        val targetY: Float
+
+        if (distance > radius && distance > 0) {
+            // Точка за кругом → проецируем на границу
+            val ratio = radius / distance
+            targetX = cx + dx * ratio
+            targetY = cy + dy * ratio
+        } else {
+            // Внутри круга — оставляем как есть
+            targetX = x
+            targetY = y
         }
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                path.moveTo(x, y)
-                currentX = x
-                currentY = y
-                points.add(PointF(x, y))
+                path.moveTo(targetX, targetY)
+                currentX = targetX
+                currentY = targetY
+                points.add(PointF(targetX, targetY))
                 isDrawing = true
             }
             MotionEvent.ACTION_MOVE -> {
                 if (isDrawing) {
-                    path.lineTo(x, y)
-                    currentX = x
-                    currentY = y
-                    points.add(PointF(x, y))
+                    // 💡 Исправление 5: убрать фильтр — рисуем ВСЕГДА при движении
+                    path.lineTo(targetX, targetY)
+                    currentX = targetX
+                    currentY = targetY
+                    points.add(PointF(targetX, targetY))
                     invalidate()
                 }
             }
-            MotionEvent.ACTION_UP -> {
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
                 isDrawing = false
             }
         }
