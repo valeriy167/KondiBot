@@ -3,19 +3,22 @@ package com.example.bakery_v2
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewOutlineProvider
-import kotlin.math.abs
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
-import kotlin.math.min
 
 class CircleDrawingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     private val path = Path()
+    private val points = mutableListOf<PointF>()
+    private val pathHistory = mutableListOf<Path>()
+    private val pointsHistory = mutableListOf<List<PointF>>()
     private val paint = Paint().apply {
         isAntiAlias = true
         color = Color.parseColor("#2C3E50")
@@ -28,33 +31,63 @@ class CircleDrawingView @JvmOverloads constructor(
     private var currentX = 0f
     private var currentY = 0f
     private var isDrawing = false
-    private val points = mutableListOf<PointF>()
 
-    private val pathHistory = mutableListOf<Path>()
-    private val pointsHistory = mutableListOf<List<PointF>>()
+    private val history = mutableListOf<PathSnapshot>()
+
+    data class PathSnapshot(
+        val path: Path,
+        val points: List<PointF>
+    )
+
+    // 👇 ИСПРАВЛЕНИЕ: GestureDetector для надёжного рисования
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean {
+            handleTouchEvent(e.x, e.y, MotionEvent.ACTION_DOWN)
+            return true
+        }
+
+        override fun onScroll(
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
+            handleTouchEvent(e2.x, e2.y, MotionEvent.ACTION_MOVE)
+            return true
+        }
+
+        fun onUp(e: MotionEvent): Boolean {
+            handleTouchEvent(e.x, e.y, MotionEvent.ACTION_UP)
+            return true
+        }
+    })
 
     init {
-        // 💡 Исправление 1: безопасный outlineProvider (без minOf!)
+        // Круглая форма
         outlineProvider = object : ViewOutlineProvider() {
             override fun getOutline(view: View, outline: Outline) {
-                // Защита от width=0
                 if (view.width <= 0 || view.height <= 0) {
                     outline.setRect(0, 0, 0, 0)
                     return
                 }
-                // Используем min() вместо minOf()
                 val size = min(view.width, view.height).toFloat()
-                outline.setOval(0f, 0f, size, size)
+                outline.setOval(0, 0, size.toInt(), size.toInt())
             }
         }
         clipToOutline = true
-        // 💡 Исправление 2: убрать setLayerType — он может ломать touch на некоторых устройствах
-        // setLayerType(LAYER_TYPE_HARDWARE, null)
+
+        // 👇 ИСПРАВЛЕНИЕ: отключаем long-press и захватываем жест
+        isLongClickable = false
+        setOnLongClickListener { true } // перехватываем и гасим
+    }
+
+    fun saveState() {
+        if (history.size > 20) history.removeAt(0) // лимит истории
+        history.add(PathSnapshot(Path(path), points.toList()))
     }
 
     fun clear() {
-        pathHistory.add(Path(path))
-        pointsHistory.add(points.toList())
+        saveState() // сохраняем перед очисткой
         path.reset()
         points.clear()
         invalidate()
@@ -63,51 +96,42 @@ class CircleDrawingView @JvmOverloads constructor(
     fun getPoints(): List<PointF> = points.toList()
 
     fun undo(): Boolean {
-        return if (pathHistory.isNotEmpty()) {
-            path.set(pathHistory.removeLast())
+        if (history.isNotEmpty()) {
+            val snapshot = history.removeLast()
+            path.set(snapshot.path)
             points.clear()
-            points.addAll(pointsHistory.removeLast())
+            points.addAll(snapshot.points)
             invalidate()
-            true
-        } else {
-            false
+            return true
         }
+        return false
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        // 💡 Исправление 3: используем getPointerCoords() для надёжности
-        val x = event.x
-        val y = event.y
+    private fun handleTouchEvent(x: Float, y: Float, action: Int) {
+        if (width == 0 || height == 0) return
 
-        // Защита от инициализации
-        if (width == 0 || height == 0) return true
-
-        // Центр и радиус с отступом
+        // Проекция на круг (плавное прилипание к краю)
         val cx = width / 2f
         val cy = height / 2f
         val radius = min(width, height) / 2f * 0.92f
 
-        // 💡 Исправление 4: НЕ отбрасываем события за кругом!
-        // Вместо этого — проецируем точку НА окружность
         val dx = x - cx
         val dy = y - cy
         val distance = sqrt(dx * dx + dy * dy)
 
-        val targetX: Float
-        val targetY: Float
-
-        if (distance > radius && distance > 0) {
-            // Точка за кругом → проецируем на границу
-            val ratio = radius / distance
-            targetX = cx + dx * ratio
-            targetY = cy + dy * ratio
+        val targetX = if (distance > radius && distance > 0) {
+            cx + dx * (radius / distance)
         } else {
-            // Внутри круга — оставляем как есть
-            targetX = x
-            targetY = y
+            x
         }
 
-        when (event.action) {
+        val targetY = if (distance > radius && distance > 0) {
+            cy + dy * (radius / distance)
+        } else {
+            y
+        }
+
+        when (action) {
             MotionEvent.ACTION_DOWN -> {
                 path.moveTo(targetX, targetY)
                 currentX = targetX
@@ -117,7 +141,6 @@ class CircleDrawingView @JvmOverloads constructor(
             }
             MotionEvent.ACTION_MOVE -> {
                 if (isDrawing) {
-                    // 💡 Исправление 5: убрать фильтр — рисуем ВСЕГДА при движении
                     path.lineTo(targetX, targetY)
                     currentX = targetX
                     currentY = targetY
@@ -130,7 +153,23 @@ class CircleDrawingView @JvmOverloads constructor(
                 isDrawing = false
             }
         }
-        return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        // 👇 Говорим родителю НЕ перехватывать жест
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            parent?.requestDisallowInterceptTouchEvent(true)
+        }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                saveState() // ← сохраняем перед новым штрихом
+                // ... остальное
+            }
+            MotionEvent.ACTION_UP -> {
+                // не обязательно, но можно для промежуточных состояний
+            }
+        }
+        return gestureDetector.onTouchEvent(event)
     }
 
     override fun onDraw(canvas: Canvas) {
