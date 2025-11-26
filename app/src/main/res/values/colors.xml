@@ -2,4 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="background_light">#FEF9F4</color>
+    <color name="border">#D7CCC8</color>
+    <color name="button_primary">#E64A19</color>
+    <color name="button_control">#795548</color>
+    <color name="background">#F9F5F0</color>         <!-- светлый кремовый -->
+    <color name="text_primary">#3E2723</color>       <!-- тёмно-коричневый -->
+    <color name="text_secondary">#5D4037</color>     <!-- коричневый -->
+    <color name="accent">#FF6F00</color>             <!-- ярко-оранжевый -->
+    <color name="button_plus_minus">#5D4037</color>  <!-- тёмно-коричневый для +/– -->
+    <color name="counter_bg">#FFF8E1</color>         <!-- светлый персик -->
 </resources>
