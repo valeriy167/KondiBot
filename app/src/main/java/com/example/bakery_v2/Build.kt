@@ -143,10 +143,12 @@ class Build : AppCompatActivity() {
                         uiHandler.post {
                             progressBar.visibility = View.GONE
                             btnCreate.isEnabled = true
-                            if (response.startsWith("OK")) {
-                                showToast("Gotovo! ${simplified.size} tochek obrabotano", Toast.LENGTH_LONG)
+                            if (response == "RECEIVED") {
+                                showToast("Accepted! Drawing cake...", Toast.LENGTH_LONG)
+                            } else if (response.startsWith("OK")) {
+                                showToast("Done!", Toast.LENGTH_LONG)
                             } else {
-                                showToast("Oshibka: $response", Toast.LENGTH_LONG)
+                                showToast("Error: $response", Toast.LENGTH_LONG)
                             }
                         }
                     }
